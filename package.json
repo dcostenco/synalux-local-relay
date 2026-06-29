@@ -1,0 +1,15 @@
+{
+  "name": "synalux-local-relay",
+  "version": "1.0.0",
+  "description": "Generic local network proxy for Synalux cloud apps",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.4",
+    "bonjour-service": "^1.4.0",
+    "dotenv": "^17.4.2"
+  }
+}
