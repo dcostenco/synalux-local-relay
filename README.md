@@ -60,3 +60,9 @@ pm2 logs synalux-local-relay
 1. The Synalux Next.js POS app determines if a local IP request needs to be relayed.
 2. It broadcasts the request (TCP socket or HTTP fetch) to Supabase over the `local-relay:{venueId}` channel.
 3. This local daemon receives the payload instantly and makes the direct connection to the printer (e.g., `192.168.1.50:9100` or port 80).
+
+## Documentation
+
+Full printer setup guide (including relay, USB, Bluetooth, cash drawers, and troubleshooting):
+
+https://github.com/dcostenco/synalux-docs/blob/main/docs_source_en/pos.md#printers--cash-drawer

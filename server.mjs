@@ -33,15 +33,18 @@ if (!RELAY_HMAC_SECRET) {
 // Security helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Verify HMAC-SHA256 signature on incoming broadcast payloads.
- * The POS server signs the payload (excluding _sig) before broadcasting.
- */
+function deepSortedStringify(obj) {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(deepSortedStringify).join(',') + ']';
+  const sorted = Object.keys(obj).sort();
+  return '{' + sorted.map(k => JSON.stringify(k) + ':' + deepSortedStringify(obj[k])).join(',') + '}';
+}
+
 function verifyPayloadHmac(data) {
   const { _sig, ...rest } = data;
   if (!_sig || typeof _sig !== 'string') return false;
   try {
-    const canonical = JSON.stringify(rest, Object.keys(rest).sort());
+    const canonical = deepSortedStringify(rest);
     const expected = crypto.createHmac('sha256', RELAY_HMAC_SECRET)
       .update(canonical)
       .digest('hex');
