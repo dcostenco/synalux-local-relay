@@ -90,3 +90,45 @@ pub async fn http_print(url: &str, method: &str, headers: &serde_json::Value, bo
         Err(format!("HTTP {}", status))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_allowed_host_private_ips() {
+        assert!(is_allowed_host("192.168.1.100"));
+        assert!(is_allowed_host("192.168.200.203"));
+        assert!(is_allowed_host("10.0.0.1"));
+        assert!(is_allowed_host("172.16.0.1"));
+        assert!(is_allowed_host("172.31.255.255"));
+    }
+
+    #[test]
+    fn test_is_allowed_host_blocked() {
+        assert!(!is_allowed_host("127.0.0.1"));
+        assert!(!is_allowed_host("0.0.0.0"));
+        assert!(!is_allowed_host("8.8.8.8"));
+        assert!(!is_allowed_host("169.254.169.254"));
+        assert!(!is_allowed_host(""));
+        assert!(!is_allowed_host("google.com"));
+    }
+
+    #[test]
+    fn test_allowed_tcp_ports() {
+        assert!(ALLOWED_TCP_PORTS.contains(&9100));
+        assert!(ALLOWED_TCP_PORTS.contains(&6101));
+        assert!(ALLOWED_TCP_PORTS.contains(&515));
+        assert!(!ALLOWED_TCP_PORTS.contains(&80));
+        assert!(!ALLOWED_TCP_PORTS.contains(&443));
+    }
+
+    #[test]
+    fn test_is_allowed_host_edge_cases() {
+        assert!(!is_allowed_host("localhost"));
+        assert!(is_allowed_host("172.17.0.1"));
+        assert!(is_allowed_host("172.30.255.1"));
+        assert!(!is_allowed_host("172.32.0.1"));
+        assert!(!is_allowed_host("1.2.3.4"));
+    }
+}
