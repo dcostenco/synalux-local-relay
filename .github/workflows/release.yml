@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: node18-linux-x64
+            artifact: synalux-local-relay-linux-x64
+          - os: macos-latest
+            target: node18-macos-x64
+            artifact: synalux-local-relay-macos-x64
+          - os: macos-latest
+            target: node18-macos-arm64
+            artifact: synalux-local-relay-macos-arm64
+          - os: windows-latest
+            target: node18-win-x64
+            artifact: synalux-local-relay-win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      - run: npx @yao-pkg/pkg server.mjs --target ${{ matrix.target }} --output dist/${{ matrix.artifact }}
+
+      - name: Compress (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd dist
+          tar czf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}
+
+      - name: Compress (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist/${{ matrix.artifact }}.exe -DestinationPath dist/${{ matrix.artifact }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}.*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/*
+          body: |
+            ## Synalux Local Relay
+
+            Download the binary for your platform and run it — no Node.js installation required.
+
+            | Platform | File |
+            |----------|------|
+            | Windows x64 | `synalux-local-relay-win-x64.zip` |
+            | macOS x64 (Intel) | `synalux-local-relay-macos-x64.tar.gz` |
+            | macOS arm64 (Apple Silicon) | `synalux-local-relay-macos-arm64.tar.gz` |
+            | Linux x64 | `synalux-local-relay-linux-x64.tar.gz` |
+
+            ### Setup
+            1. Extract the binary
+            2. Copy `.env.example` to `.env` and fill in your credentials
+            3. Run the binary
+
+            Binaries are code-signed by [SignPath Foundation](https://signpath.org).

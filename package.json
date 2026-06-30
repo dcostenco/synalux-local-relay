@@ -4,8 +4,14 @@
   "description": "Generic local network proxy for Synalux cloud apps",
   "main": "server.mjs",
   "type": "module",
+  "bin": "server.mjs",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "build": "npx @yao-pkg/pkg server.mjs --output dist/synalux-local-relay"
+  },
+  "pkg": {
+    "targets": ["node18"],
+    "outputPath": "dist"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
