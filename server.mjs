@@ -3,6 +3,53 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import net from 'net';
 import Bonjour from 'bonjour-service';
+import { readFileSync, writeFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const VERSION = '2.0.0';
+
+// Auto-update: check GitHub for newer server.mjs on startup
+async function autoUpdate() {
+  try {
+    const updateUrl = 'https://raw.githubusercontent.com/dcostenco/synalux-local-relay/main/server.mjs';
+    const res = await fetch(updateUrl);
+    if (!res.ok) return false;
+    const remote = await res.text();
+    const local = readFileSync(__filename, 'utf-8');
+    const localHash = createHash('sha256').update(local).digest('hex');
+    const remoteHash = createHash('sha256').update(remote).digest('hex');
+    if (localHash === remoteHash) {
+      console.log(`[Auto-Update] v${VERSION} is up to date`);
+      return false;
+    }
+    writeFileSync(__filename, remote, 'utf-8');
+    console.log('[Auto-Update] Updated to latest version — restarting...');
+    // If running under PM2, it auto-restarts on file change.
+    // Otherwise, exit and let the user/wrapper restart.
+    process.exit(0);
+  } catch (err) {
+    console.log(`[Auto-Update] Check failed (offline?): ${err.message}`);
+    return false;
+  }
+}
+
+await autoUpdate();
+
+// Migrate old .env: remove RELAY_HMAC_SECRET if present (no longer needed)
+try {
+  const envPath = join(__dirname, '.env');
+  const envContent = readFileSync(envPath, 'utf-8');
+  if (envContent.includes('RELAY_HMAC_SECRET')) {
+    const cleaned = envContent.split('\n').filter(l => !l.startsWith('RELAY_HMAC_SECRET')).join('\n');
+    writeFileSync(envPath, cleaned, 'utf-8');
+    console.log('[Migration] Removed RELAY_HMAC_SECRET from .env (no longer needed)');
+  }
+} catch {}
 
 process.on('uncaughtException', (err) => {
   console.error('[Synalux Local Relay] Uncaught Exception:', err);
