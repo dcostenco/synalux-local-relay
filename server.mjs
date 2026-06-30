@@ -40,16 +40,9 @@ async function autoUpdate() {
 
 await autoUpdate();
 
-// Migrate old .env: remove RELAY_HMAC_SECRET if present (no longer needed)
-try {
-  const envPath = join(__dirname, '.env');
-  const envContent = readFileSync(envPath, 'utf-8');
-  if (envContent.includes('RELAY_HMAC_SECRET')) {
-    const cleaned = envContent.split('\n').filter(l => !l.startsWith('RELAY_HMAC_SECRET')).join('\n');
-    writeFileSync(envPath, cleaned, 'utf-8');
-    console.log('[Migration] Removed RELAY_HMAC_SECRET from .env (no longer needed)');
-  }
-} catch {}
+// RELAY_SECRET is the per-venue credential — used to authenticate with the DB queue.
+// It's stored in .env as RELAY_HMAC_SECRET (legacy name) or RELAY_SECRET.
+const RELAY_SECRET = process.env.RELAY_SECRET || process.env.RELAY_HMAC_SECRET || null;
 
 process.on('uncaughtException', (err) => {
   console.error('[Synalux Local Relay] Uncaught Exception:', err);
@@ -143,7 +136,7 @@ async function processPrintJob(job) {
     }
 
     // Mark done
-    await supabase.rpc('complete_print_job', { p_job_id: job.id, p_success: true });
+    await supabase.rpc('complete_print_job', { p_job_id: job.id, p_success: true, p_relay_secret: RELAY_SECRET });
     printCount++;
     return true;
   } catch (err) {
@@ -152,6 +145,7 @@ async function processPrintJob(job) {
       p_job_id: job.id,
       p_success: false,
       p_error: err.message,
+      p_relay_secret: RELAY_SECRET,
     });
     return false;
   }
@@ -161,6 +155,7 @@ async function pollForJobs() {
   try {
     const { data: job, error } = await supabase.rpc('claim_print_job', {
       p_venue_id: RELAY_CHANNEL_ID,
+      p_relay_secret: RELAY_SECRET,
     });
 
     if (error) {

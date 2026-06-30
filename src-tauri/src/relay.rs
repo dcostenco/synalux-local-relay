@@ -56,7 +56,7 @@ async fn claim_and_process(
         .header("apikey", &cfg.supabase_key)
         .header("Authorization", format!("Bearer {}", cfg.supabase_key))
         .header("Content-Type", "application/json")
-        .json(&serde_json::json!({ "p_venue_id": cfg.venue_id }))
+        .json(&serde_json::json!({ "p_venue_id": cfg.venue_id, "p_relay_secret": cfg.relay_hmac_secret }))
         .send()
         .await
         .map_err(|e| format!("HTTP error: {}", e))?;
@@ -121,6 +121,7 @@ async fn claim_and_process(
             "p_job_id": job_id,
             "p_success": success,
             "p_error": error,
+            "p_relay_secret": cfg.relay_hmac_secret,
         }))
         .send()
         .await;
