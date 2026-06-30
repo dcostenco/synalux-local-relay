@@ -2,10 +2,6 @@ name: Build Synalux Print Relay
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'src-tauri/**'
-      - 'ui/**'
 
 jobs:
   build-macos:
