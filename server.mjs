@@ -136,7 +136,7 @@ async function processPrintJob(job) {
     }
 
     // Mark done
-    await supabase.rpc('complete_print_job', { p_job_id: job.id, p_success: true, p_relay_secret: RELAY_SECRET });
+    await supabase.rpc('complete_print_job', { p_job_id: job.id, p_success: true, p_relay_secret: RELAY_SECRET, p_error: null });
     printCount++;
     return true;
   } catch (err) {
