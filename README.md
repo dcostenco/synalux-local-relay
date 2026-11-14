@@ -29,7 +29,7 @@ The desktop relay needs no command line or configuration file: it claims the one
 
 ## Building from Source
 
-The Node relay (`server.mjs`) is the legacy command-line version, kept for existing installs. It does not pair through POS; it reads its settings from `.env`.
+The Node relay (`server.mjs`) is the legacy command-line version, kept for existing installs. It does not pair through POS; it reads its settings from `.env`. It cannot be set up for a venue that does not already have a relay secret: POS no longer issues one for it, and `RELAY_SECRET` in the legacy `.env` that POS offers is a placeholder.
 
 ```bash
 git clone https://github.com/dcostenco/synalux-local-relay.git
@@ -42,7 +42,7 @@ node server.mjs
 ### Configuration (`.env`, Node relay only)
 ```env
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-supabase-anon-or-service-key
+SUPABASE_KEY=your-supabase-anon-key
 RELAY_CHANNEL_ID=your-venue-id-here
 RELAY_SECRET=your-venue-relay-secret
 ```
@@ -60,9 +60,9 @@ pm2 save
 
 ## How It Works
 
-1. Synalux POS broadcasts a print/device request to Supabase over the `local-relay:{venueId}` channel
-2. This relay receives the payload and forwards it to the local device (e.g. `192.168.1.50:9100`)
-3. All payloads are HMAC-signed and verified; only RFC1918 addresses and printer ports are allowed
+1. Synalux POS adds each print job to the venue's print queue
+2. The relay claims queued jobs, proving it belongs to the venue with its relay credential (the Node relay also listens for new jobs and checks every 5 seconds)
+3. It sends each job only to a printer on your local network (for example `192.168.1.50:9100`) and reports the result back to the queue
 
 ## Documentation
 
