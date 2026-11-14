@@ -6,22 +6,18 @@ Since Vercel cannot reach `192.168.x.x` addresses, this relay connects to a Supa
 
 ## Download
 
-Pre-built binaries — no Node.js required:
+Download the relay from inside Synalux POS: **Settings → Printers → Cloud Print Relay**
+([pos.synalux.ai/pos/settings/printers](https://pos.synalux.ai/pos/settings/printers)).
+It offers the installer for the release your POS supports:
 
-| Platform | Download |
-|----------|----------|
-| Windows x64 | [synalux-local-relay-win-x64.zip](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-win-x64.zip) |
-| macOS (Apple Silicon) | [synalux-local-relay-macos-arm64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-macos-arm64.tar.gz) |
-| macOS (Intel) | [synalux-local-relay-macos-x64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-macos-x64.tar.gz) |
-| Linux x64 | [synalux-local-relay-linux-x64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-linux-x64.tar.gz) |
+- **macOS (Apple Silicon)**: `.dmg`
+- **Windows x64**: `.msi`
 
 [All releases](https://github.com/dcostenco/synalux-local-relay/releases)
 
-Windows binaries are code-signed by [SignPath Foundation](https://signpath.org).
-
 ## Quick Start
 
-1. Download the binary for your platform
+1. Download the relay from Synalux POS (Settings → Printers → Cloud Print Relay)
 2. Copy `.env.example` to `.env` and fill in your credentials
 3. Run the binary
 
