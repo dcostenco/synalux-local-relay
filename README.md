@@ -6,43 +6,48 @@ Since Vercel cannot reach `192.168.x.x` addresses, this relay connects to a Supa
 
 ## Download
 
-Pre-built binaries — no Node.js required:
+Download the relay from inside Synalux POS: **Settings → Printers & KDS → Cloud Print Relay**
+([pos.synalux.ai/pos/settings/printers](https://pos.synalux.ai/pos/settings/printers)).
+It offers the installer for the release your POS supports:
 
-| Platform | Download |
-|----------|----------|
-| Windows x64 | [synalux-local-relay-win-x64.zip](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-win-x64.zip) |
-| macOS (Apple Silicon) | [synalux-local-relay-macos-arm64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-macos-arm64.tar.gz) |
-| macOS (Intel) | [synalux-local-relay-macos-x64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-macos-x64.tar.gz) |
-| Linux x64 | [synalux-local-relay-linux-x64.tar.gz](https://github.com/dcostenco/synalux-local-relay/releases/latest/download/synalux-local-relay-linux-x64.tar.gz) |
+- **macOS (Apple Silicon)**: `.dmg`
+- **Windows x64**: `.msi`
 
 [All releases](https://github.com/dcostenco/synalux-local-relay/releases)
 
-Windows binaries are code-signed by [SignPath Foundation](https://signpath.org).
+There is no installer for Intel Macs or Linux.
 
 ## Quick Start
 
-1. Download the binary for your platform
-2. Copy `.env.example` to `.env` and fill in your credentials
-3. Run the binary
+1. In Synalux POS, open **Settings → Printers & KDS → Cloud Print Relay** and install the relay app for your platform
+2. Click **Add relay computer**
+3. Click **Open Relay App** and allow the browser prompt
+4. Confirm the relay dialog, then check that the tray shows **Status: Connected**
+5. Click **Test Print** on any printer
 
-### Configuration (`.env`)
-```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-supabase-anon-or-service-key
-RELAY_CHANNEL_ID=your-venue-id-here
-RELAY_HMAC_SECRET=your-hmac-secret-here
-```
-
-Generate your HMAC secret: `openssl rand -hex 32`
+The desktop relay needs no command line or configuration file: it claims the one-time setup link from POS. It runs in the system tray and starts automatically on boot.
 
 ## Building from Source
+
+The Node relay (`server.mjs`) is the legacy command-line version, kept for existing installs. It does not pair through POS; it reads its settings from `.env`.
 
 ```bash
 git clone https://github.com/dcostenco/synalux-local-relay.git
 cd synalux-local-relay
 npm install
+cp .env.example .env   # then fill in the values below
 node server.mjs
 ```
+
+### Configuration (`.env`, Node relay only)
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-supabase-anon-or-service-key
+RELAY_CHANNEL_ID=your-venue-id-here
+RELAY_SECRET=your-venue-relay-secret
+```
+
+`RELAY_SECRET` is the relay secret Synalux POS issued for your venue (the older name `RELAY_HMAC_SECRET` is still read). The print queue checks it against the venue's stored secret, so a value you generate yourself is rejected.
 
 ### Production Deployment (PM2)
 
