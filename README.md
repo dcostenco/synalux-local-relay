@@ -62,7 +62,7 @@ pm2 save
 
 1. Synalux POS adds each print job to the venue's print queue
 2. The relay claims queued jobs, proving it belongs to the venue with its relay credential (the Node relay also listens for new jobs and checks every 5 seconds)
-3. It sends each job only to a printer at your venue (a private network address such as `192.168.1.50:9100` or, with the desktop relay, a print queue or serial port on the relay's own computer) and reports the result back to the queue
+3. It sends each job only to a printer at your venue (a private network address such as `192.168.1.50:9100` or, with the desktop relay, a Windows print queue or a serial port on the relay's own computer) and reports the result back to the queue
 
 ## Documentation
 
